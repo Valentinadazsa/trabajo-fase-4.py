@@ -53,3 +53,46 @@ class Cliente(Entidad):
     def get_nombre(self):
         return self.__nombre
 
+# ============= RESERVAS ============
+class Reserva:
+
+    def __init__(self, cliente, servicio, cantidad, tipo_tiempo):
+        if cantidad <= 0:
+            raise ReservaError("Tiempo inválido")
+
+        self._cliente = cliente
+        self._servicio = servicio
+        self._cantidad = cantidad
+        self._tipo_tiempo = tipo_tiempo
+        self._estado = "pendiente"
+
+    def confirmar(self):
+        if self._estado != "pendiente":
+            raise ReservaError("Solo reservas pendientes pueden confirmarse")
+        self._estado = "confirmada"
+
+    def procesar(self):
+        try:
+            self.confirmar()
+            costo = self._servicio.calcular_costo(self._cantidad, self._tipo_tiempo)
+            self._estado = "procesada"
+            return costo
+        except Exception as e:
+            Logger.log(f"Error al procesar: {e}")
+            raise ReservaError("Error en procesamiento") from e
+
+    def mostrar(self):
+        return f"{self._cliente.mostrar()} | {self._servicio.mostrar()} | Estado: {self._estado}"
+
+
+# ================== SISTEMA ==================
+class Sistema:
+    def __init__(self):
+        self.clientes = []
+        self.reservas = []
+
+    def agregar_cliente(self, cliente):
+        self.clientes.append(cliente)
+
+    def crear_reserva(self, reserva):
+        self.reservas.append(reserva)
