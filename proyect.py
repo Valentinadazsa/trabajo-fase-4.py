@@ -96,3 +96,72 @@ class Sistema:
 
     def crear_reserva(self, reserva):
         self.reservas.append(reserva)
+        
+
+# ================== SERVICIO ABSTRACTO ==================
+class Servicio(Entidad):
+    def __init__(self, id, nombre, tarifa_base):
+        super().__init__(id)
+
+        if not nombre:
+            raise ServicioError("Nombre de servicio inválido")
+        if tarifa_base <= 0:
+            raise ServicioError("Tarifa base inválida")
+
+        self._nombre = nombre
+        self._tarifa_base = tarifa_base
+
+    def mostrar(self):
+        return f"{self._nombre} - Tarifa: {self._tarifa_base}"
+
+    def convertir_a_horas(self, cantidad, unidad):
+        try:
+            if cantidad <= 0:
+                raise ServicioError("Cantidad inválida")
+
+            unidad = unidad.lower()
+
+            if unidad == "horas":
+                return cantidad
+            elif unidad == "días" or unidad == "dias":
+                return cantidad * 24
+            elif unidad == "semanas":
+                return cantidad * 24 * 7
+            else:
+                raise ServicioError("Unidad de tiempo no válida")
+
+        except Exception as e:
+            Logger.log(f"Error al convertir tiempo: {str(e)}")
+            raise ServicioError("Error en conversión de tiempo") from e
+
+    @abstractmethod
+    def calcular_costo(self, cantidad, unidad):
+        pass
+
+
+# ================== SERVICIOS ==================
+class ReservaSala(Servicio):
+    def __init__(self, id, tarifa):
+        super().__init__(id, "Reserva de Sala", tarifa)
+
+    def calcular_costo(self, cantidad, unidad):
+        horas = self.convertir_a_horas(cantidad, unidad)
+        return self._tarifa_base * horas
+
+
+class AlquilerEquipo(Servicio):
+    def __init__(self, id, tarifa):
+        super().__init__(id, "Alquiler de Equipo", tarifa)
+
+    def calcular_costo(self, cantidad, unidad):
+        horas = self.convertir_a_horas(cantidad, unidad)
+        return self._tarifa_base * horas * 0.8
+
+
+class Asesoria(Servicio):
+    def __init__(self, id, tarifa):
+        super().__init__(id, "Asesoría Especializada", tarifa)
+
+    def calcular_costo(self, cantidad, unidad):
+        horas = self.convertir_a_horas(cantidad, unidad)
+        return self._tarifa_base * horas * 1.2
