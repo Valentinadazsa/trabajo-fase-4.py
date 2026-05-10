@@ -208,3 +208,46 @@ class App:
         except Exception as e:
             Logger.log(str(e))
             messagebox.showerror("Error", str(e))
+
+def crear_reserva(self):
+        try:
+            if not self.sistema.clientes:
+                raise ReservaError("No hay clientes")
+
+            cliente = self.sistema.clientes[-1]
+
+            tipo = self.tipo_servicio.get()
+
+            if tipo == "Sala":
+                servicio = ReservaSala(1, 50)
+            elif tipo == "Equipo":
+                servicio = AlquilerEquipo(2, 30)
+            else:
+                servicio = Asesoria(3, 80)
+
+            cantidad = int(self.tiempo.get())
+            tipo_tiempo = self.tipo_tiempo.get()
+
+            reserva = Reserva(cliente, servicio, cantidad, tipo_tiempo)
+            costo = reserva.procesar()
+
+            self.sistema.crear_reserva(reserva)
+
+            messagebox.showinfo(
+                "Reserva Exitosa",
+                f"Cliente: {cliente.get_nombre()}\n"
+                f"Servicio: {servicio._nombre}\n"
+                f"Tiempo: {cantidad} {tipo_tiempo}\n"
+                f"Costo Total: ${costo}"
+            )
+
+        except Exception as e:
+            Logger.log(str(e))
+            messagebox.showerror("Error", str(e))
+
+
+# ================== MAIN ==================
+if _name_ == "_main_":
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
